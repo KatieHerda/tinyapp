@@ -29,6 +29,14 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${generatedShortURL}`);
 });
 
+//add post request to delete a short URL and redirect to the /urls page
+app.post('/urls/:shortURL/delete', (req, res) => {
+  const key = req.params.shortURL;
+
+  delete urlDatabase[key];
+  res.redirect('/urls');
+})
+
 //renders the urls_new template in browser, presents the form to the user.
 //needs to be before the get /urls/:id
 app.get('/urls/new', (req, res) => {
@@ -83,6 +91,7 @@ app.get('/hello', (req, res) => {
   res.send('<html><body>Hello <b>World</b></body></html>\n');
 });
 
+//prints a message to terminal once connection established to port
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
