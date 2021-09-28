@@ -12,6 +12,11 @@ const urlDatabase = {
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+//generate a random shortURL (string)
+const generateRandomString = () => {
+    Math.random().toString(36).substr(2, 6);
+}
+
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   res.send("Ok");         // Respond with 'Ok' (we will replace this)
