@@ -37,6 +37,16 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   res.redirect('/urls');
 })
 
+//add post request to edit a short URL and redirect to the /urls page
+app.post('/urls/:shortURL/', (req, res) => {
+  const key = req.params.shortURL;
+  const newURL = req.body.longURL;
+
+  urlDatabase[key] = newURL;
+
+  res.redirect('/urls');
+})
+
 //renders the urls_new template in browser, presents the form to the user.
 //needs to be before the get /urls/:id
 app.get('/urls/new', (req, res) => {
