@@ -38,7 +38,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 })
 
 //add post request to edit a short URL and redirect to the /urls page
-app.post('/urls/:shortURL/', (req, res) => {
+app.post('/urls/:shortURL/edit', (req, res) => {
   const key = req.params.shortURL;
   const newURL = req.body.longURL;
 
