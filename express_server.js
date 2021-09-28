@@ -14,12 +14,13 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 //generate a random shortURL (string)
 const generateRandomString = () => {
-    Math.random().toString(36).substr(2, 6);
-}
+    return Math.random().toString(36).substr(2, 6);
+};
 
-app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+app.post('/urls', (req, res) => {
+  let generatedShortURL = generateRandomString();
+  urlDatabase[generatedShortURL] = req.body.longURL
+  res.redirect(`/urls/${generatedShortURL}`); 
 });
 
 app.get('/urls/new', (req, res) => {
@@ -29,7 +30,23 @@ app.get('/urls/new', (req, res) => {
 app.get('/urls/:shortURL', (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]}
   res.render('urls_show', templateVars)
-})
+});
+
+app.get('/u/:shortURL', (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  
+  //redirect shortURLs that are nonexistant
+  if (res.statusCode !== '302') {
+    //can we alert the user somehow?!
+    res.redirect('/urls');
+  }
+  //determine if long URL contains http:// we're not doubling up.
+  if (longURL.includes('http://')){
+    res.redirect(`${longURL}`);
+  } else {
+    res.redirect(`http://${longURL}`);
+  }
+});
 
 app.get('/urls', (req, res) => {
   const templateVars = { urls: urlDatabase };
