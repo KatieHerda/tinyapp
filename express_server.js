@@ -79,7 +79,6 @@ app.get('/urls/show', (req, res) => {
   res.render('urls_show', templateVars);
 });
 
-
 // : indicates that shortURL is a route paramater
 //the value in this part of the URL will be available in the req.params obj
 //shortURL and longURL are passed to the template in a templateVars obj
