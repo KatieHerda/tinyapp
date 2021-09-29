@@ -35,6 +35,17 @@ const generateRandomString = () => {
   return Math.random().toString(36).substr(2, 6);
 };
 
+//function to find if user exists 
+const findUserByEmail = (email) => {
+  for (const userID in users) {
+    const idOfUser = users[userID]
+    if (idOfUser.email === email) {
+      return idOfUser;
+    }
+  }
+  return null;
+}
+
 //recieves form submission and creates a new key:value pair in obj
 //redirected to shortURL section
 app.post('/urls', (req, res) => {
@@ -86,9 +97,20 @@ app.post('/register', (req, res) => {
     password : password
   };
 
+  //If email / password are empty strings   
+  const user = findUserByEmail(email);
+  if (!email || !password) {
+    return res.status(400).send('email or password cannot be blank');
+  }
+  
+  //If someone tries to register with email that already exists
+  if (user) {
+    return res.status(400).send('user with that email already exists');
+  }
+
   res.cookie('user_id', users[id].id)
   res.redirect('/urls')
-})
+});
 
 
 //renders the urls_new template in browser, presents the form to the user.
