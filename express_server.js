@@ -12,6 +12,19 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com'
 };
 
+const users = {
+  0123: {
+    id: "0123",
+    email: "katie@coolkids.com",
+    password: "abcd"
+  },
+  4567: {
+    id: "4567",
+    email: "artur@coolkids.com",
+    password: "efgh"
+  }
+}
+
 // when browser submits a post request, the data in body is sent as buffer, not readable
 // a body parser library will convert the request body from buffer into readable string
 app.use(express.urlencoded({ extended: false }));
@@ -50,41 +63,60 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 
 //add post request for login that will track cookies.
 app.post('/login', (req, res) => {
-  const {username} = req.body;
-  res.cookie('username', username);
-  // console.log(req.cookies)
+  const userID = req.body.userID;
+  res.cookie('user_id', userID);
 
   res.redirect('/urls');
 });
 
 //add post request to logout
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
-  //console.log(req.cookies)
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
+
+app.post('/register', (req, res) => {
+  const id = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+
+  users[id] = {
+    id : id, 
+    email : email, 
+    password : password
+  };
+
+  res.cookie('user_id', users[id].id)
+  res.redirect('/urls')
+})
 
 
 //renders the urls_new template in browser, presents the form to the user.
 //needs to be before the get /urls/:id
 app.get('/urls/new', (req, res) => {
-  const userName = req.cookies["username"];
-  const templateVars = { urls: urlDatabase, username: userName};
+  const userID = req.cookies['users_id'];
+  const templateVars = { user: users[userID]};
+
   res.render('urls_new', templateVars);
 });
 
 app.get('/urls/show', (req, res) => {
-  const userName = req.cookies["username"];
-  const templateVars = { urls: urlDatabase, username: userName};
+  const userID = req.cookies['user_id'];
+  const templateVars = { urls: urlDatabase, user: users[userID]};
+ 
   res.render('urls_show', templateVars);
+});
+
+app.get('/register', (req, res) => {
+  res.render('register');
 });
 
 // : indicates that shortURL is a route paramater
 //the value in this part of the URL will be available in the req.params obj
 //shortURL and longURL are passed to the template in a templateVars obj
 app.get('/urls/:shortURL', (req, res) => {
-  const userName = req.cookies["username"];
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: userName};
+  const userID = req.cookies['user_id'];
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: users[userID]};
   res.render('urls_show', templateVars);
 });
 
@@ -102,8 +134,8 @@ app.get('/u/:shortURL', (req, res) => {
 
 //urls route that uses res.render to pass URL data to the template
 app.get('/urls', (req, res) => {
-  const userName = req.cookies["username"];
-  const templateVars = { urls: urlDatabase, username: userName};
+  const userID = req.cookies['user_id'];
+  const templateVars = { urls: urlDatabase, user: users[userID]};
   res.render('urls_index', templateVars);
 });
 
