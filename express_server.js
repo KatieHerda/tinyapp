@@ -6,7 +6,6 @@ const PORT = 8080;
 //tells express app to use EJS as its templating engine
 app.set('view engine', 'ejs');
 
-app.use(cookieParser());
 
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
@@ -15,9 +14,9 @@ const urlDatabase = {
 
 // when browser submits a post request, the data in body is sent as buffer, not readable
 // a body parser library will convert the request body from buffer into readable string
-const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: false }));
 
+app.use(cookieParser());
 
 //generate a random shortURL (string)
 const generateRandomString = () => {
