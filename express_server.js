@@ -15,7 +15,6 @@ const urlDatabase = {
 // when browser submits a post request, the data in body is sent as buffer, not readable
 // a body parser library will convert the request body from buffer into readable string
 app.use(express.urlencoded({ extended: false }));
-
 app.use(cookieParser());
 
 //generate a random shortURL (string)
@@ -24,7 +23,6 @@ const generateRandomString = () => {
 };
 
 //recieves form submission and creates a new key:value pair in obj
-//shortURL:longUR
 //redirected to shortURL section
 app.post('/urls', (req, res) => {
   let generatedShortURL = generateRandomString();
@@ -54,6 +52,7 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 app.post('/login', (req, res) => {
   const {username} = req.body;
   res.cookie('username', username);
+  // console.log(req.cookies)
 
   res.redirect('/urls');
 });
@@ -61,6 +60,7 @@ app.post('/login', (req, res) => {
 //add post request to logout
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
+  //console.log(req.cookies)
   res.redirect('/urls');
 });
 
@@ -82,7 +82,7 @@ app.get('/urls/show', (req, res) => {
 
 // : indicates that shortURL is a route paramater
 //the value in this part of the URL will be available in the req.params obj
-//both the shortURL and longURL are passed to the template in a templateVars obj
+//shortURL and longURL are passed to the template in a templateVars obj
 app.get('/urls/:shortURL', (req, res) => {
   const userName = req.cookies["username"];
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: userName};
