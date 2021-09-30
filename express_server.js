@@ -53,12 +53,16 @@ const findUserByEmail = (email) => {
   return null;
 }
 
-// //function that returns URLs for a given user ID
-// const urlsForUser = (id) => {
-//   if (urlDatabase[shortU].userID)
-
-//   //(userID !== )
-// }
+//function that returns URLs for a given user ID
+const urlsForUser = (id) => {
+  let userURLsArr = [];
+   for (const shortU in urlDatabase) {
+     if (id === urlDatabase[shortU].userID) {
+      userURLsArr.push(shortU);
+     }
+   }
+ return urlsForUser;
+}
 
 
 //recieves form submission and creates a new key:value pair in obj
