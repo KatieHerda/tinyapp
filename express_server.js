@@ -268,7 +268,14 @@ app.get('/urls', (req, res) => {
 
 //Root path
 app.get('/', (req, res) => {
-  res.send('Hello!');
+  const userID = req.cookies['user_id'];
+  const user = users[userID];
+
+  if(!user) {
+    return res.redirect('/login');
+  } 
+  
+  res.redirect('/urls')
 });
 
 // //LISTEN ON PORT
