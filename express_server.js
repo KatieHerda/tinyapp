@@ -9,8 +9,14 @@ app.set('view engine', 'ejs');
 
 
 const urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
+  'b2xVn2': {
+    longURL: 'http://www.lighthouselabs.ca',
+    userID: 'A1234'
+},
+  '9sm5xK': {
+    longURL: 'http://www.lighthouselabs.ca',
+    userID: 'A4567'
+  }
 };
 
 const users = {
@@ -50,9 +56,9 @@ const findUserByEmail = (email) => {
 //recieves form submission and creates a new key:value pair in obj
 //redirected to shortURL section
 app.post('/urls', (req, res) => {
-  const userID = req.cookies['user_id']
+  const userID = req.cookies['user_id'];
   let generatedShortURL = generateRandomString();
-  urlDatabase[generatedShortURL] = req.body.longURL;
+  urlDatabase[generatedShortURL] = {longURL: req.body.longURL, userID: userID};
 
   if (!users[userID]) {
     res.send('Must be logged in to create a new short URL\n')
@@ -75,8 +81,7 @@ app.post('/urls/:shortURL/edit', (req, res) => {
   const key = req.params.shortURL;
   const newURL = req.body.longURL;
 
-  urlDatabase[key] = newURL;
-
+  urlDatabase[key].longURL = newURL;
   res.redirect('/urls');
 });
 
@@ -91,7 +96,6 @@ app.post('/login', (req, res) => {
     return res.status(400).send('email or password cannot be blank');
   }
 
-  //If email / password are empty strings   
   if (!userID) {
     return res.status(403).send('email not found');
   }
@@ -116,7 +120,11 @@ app.post('/register', (req, res) => {
   const password = req.body.password;
   const user = findUserByEmail(email);
 
-  users[id] = { id, email, password };
+  users[id] = { 
+    id, 
+    email, 
+    password 
+  };
 
   //If email / password are empty strings   
   if (!email || !password) {
@@ -136,7 +144,7 @@ app.post('/register', (req, res) => {
 //renders the urls_new template in browser, presents the form to the user.
 //needs to be before the get /urls/:id
 app.get('/urls/new', (req, res) => {
-  const userID = req.cookies['users_id'];
+  const userID = req.cookies['user_id'];
   const templateVars = { user: users[userID]};
 
   
@@ -145,8 +153,6 @@ app.get('/urls/new', (req, res) => {
   } else {
     res.render('urls_new', templateVars);
   }
-
-  
 });
 
 app.get('/urls/show', (req, res) => {
@@ -175,13 +181,13 @@ app.get('/login', (req, res) => {
 //shortURL and longURL are passed to the template in a templateVars obj
 app.get('/urls/:shortURL', (req, res) => {
   const userID = req.cookies['user_id'];
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: users[userID]};
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[userID]};
   res.render('urls_show', templateVars);
 });
 
 //when the shortURL is clicked on, it redirects to actual website.
 app.get('/u/:shortURL', (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
 
   //determine if long URL contains http:// we're not doubling up.
   if (longURL.includes('http://')) {
