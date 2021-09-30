@@ -187,8 +187,13 @@ app.get('/urls/:shortURL', (req, res) => {
 
 //when the shortURL is clicked on, it redirects to actual website.
 app.get('/u/:shortURL', (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
+  const shortURL = req.params.shortURL;
 
+  if (!urlDatabase[shortURL]) {
+    res.send('Short URL does not exist!')
+  }
+
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   //determine if long URL contains http:// we're not doubling up.
   if (longURL.includes('http://')) {
     res.redirect(`${longURL}`);
