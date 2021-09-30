@@ -24,12 +24,12 @@ const users = {
   A1234: {
     id: "A1234",
     email: "katie@coolkids.com",
-    password: "abcd"
+    password: bcrypt.hashSync("abcd", 10)
   },
   A4567: {
     id: "A4567",
     email: "artur@coolkids.com",
-    password: "efgh"
+    password: bcrypt.hashSync("efgh", 10)
   }
 };
 
@@ -133,8 +133,10 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 //add post request for login that will track cookies.
 app.post('/login', (req, res) => {
   const email = req.body.email;
+  //input password
   const password = req.body.password;
   const userID = findUserByEmail(email);
+  const doPasswordsMatch = bcrypt.compareSync(password, userID.password);
 
   //If email / password are empty strings
   if (!email || !password) {
@@ -144,8 +146,8 @@ app.post('/login', (req, res) => {
   if (!userID) {
     return res.status(403).send('email not found');
   }
-
-  if (userID.password !== password) {
+  //If password does not match userID password
+  if (!doPasswordsMatch) {
     return res.status(403).send('password does not match');
   }
 
@@ -172,8 +174,6 @@ app.post('/register', (req, res) => {
     email,
     password : hashedPassword
   };
-
-  console.log(users[id])
 
   //If email / password are empty strings
   if (!email || !password) {
