@@ -1,5 +1,5 @@
 const express = require('express');
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session')
 const { reset } = require('nodemon');
 const bcrypt = require('bcryptjs');
 const app = express();
@@ -37,7 +37,11 @@ const users = {
 // when browser submits a post request, the data in body is sent as buffer, not readable
 // a body parser library will convert the request body from buffer into readable string
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+
+app.use(cookieSession({
+  name: 'session',
+  keys: ['secretKeyOne', 'secretkeyTwo'],
+}))
 
 // //FUNCTIONS
 //generate a random shortURL (string)
@@ -71,11 +75,10 @@ const urlsForUser = (id) => {
 //recieves form submission and creates a new key:value pair in obj
 //redirected to shortURL section
 app.post('/urls', (req, res) => {
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   let generatedShortURL = generateRandomString();
   urlDatabase[generatedShortURL] = {longURL: req.body.longURL, userID: userID};
 
-  console.log(urlDatabase)
   if (!users[userID]) {
     res.send('Must be logged in to create a new short URL\n');
   } else {
@@ -87,7 +90,7 @@ app.post('/urls', (req, res) => {
 //add post request to delete a short URL and redirect to the /urls page
 app.post('/urls/:shortURL/delete', (req, res) => {
   const key = req.params.shortURL;
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   console.log(userID);
   const urlOwner = urlDatabase[key].userID; //Returns array of URLs for given user
 
@@ -110,7 +113,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 //add post request to edit a short URL and redirect to the /urls page
 app.post('/urls/:shortURL/edit', (req, res) => {
   const key = req.params.shortURL;
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   const urlOwner = urlDatabase[key].userID; //Returns array of URLs for given user
 
   //for a given user, if the URL is not in their given array, do not allow edit
@@ -151,13 +154,13 @@ app.post('/login', (req, res) => {
     return res.status(403).send('password does not match');
   }
 
-  res.cookie('user_id', userID.id);
+  req.session.user_id = userID.id;
   res.redirect('/urls');
 });
 
 //add post request to logout
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/urls');
 });
 
@@ -185,7 +188,7 @@ app.post('/register', (req, res) => {
     return res.status(400).send('user with that email already exists');
   }
 
-  res.cookie('user_id', users[id].id);
+  req.session.user_id = users[id].id;
   res.redirect('/urls');
 });
 
@@ -193,7 +196,7 @@ app.post('/register', (req, res) => {
 //renders the urls_new template in browser, presents the form to the user.
 //needs to be before the get /urls/:id
 app.get('/urls/new', (req, res) => {
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   const templateVars = { user: users[userID]};
 
   
@@ -205,21 +208,21 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get('/urls/show', (req, res) => {
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   const templateVars = { urls: urlDatabase, user: users[userID]};
  
   res.render('urls_show', templateVars);
 });
 
 app.get('/register', (req, res) => {
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   const templateVars = { user: users[userID]};
 
   res.render('register', templateVars);
 });
 
 app.get('/login', (req, res) => {
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   const templateVars = { user: users[userID] };
 
   res.render('login', templateVars);
@@ -228,7 +231,7 @@ app.get('/login', (req, res) => {
 //the value in this part of the URL will be available in the req.params obj
 //shortURL and longURL are passed to the template in a templateVars obj
 app.get('/urls/:shortURL', (req, res) => {
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   const shortU = req.params.shortURL;
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[userID]};
 
@@ -261,7 +264,7 @@ app.get('/u/:shortURL', (req, res) => {
 
 //urls route that uses res.render to pass URL data to the template
 app.get('/urls', (req, res) => {
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   const user = users[userID];
   const templateVars = { urls: urlDatabase, user: users[userID], userID };
 
@@ -275,7 +278,7 @@ app.get('/urls', (req, res) => {
 
 //Root path
 app.get('/', (req, res) => {
-  const userID = req.cookies['user_id'];
+  const userID = req.session.user_id;
   const user = users[userID];
 
   if(!user) {
