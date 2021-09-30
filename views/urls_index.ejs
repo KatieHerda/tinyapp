@@ -23,7 +23,11 @@
         </tr>
       </thead>
       <tbody>
+        
         <% for(let url in urls) { %>
+          <% if (userID === urls[url].userID) { %>
+
+
           <tr>
             <td><%= url %></td>
             <td><%= urls[url].longURL %></td>
@@ -40,6 +44,7 @@
               </form>
             </td>
           </tr>
+        <% } %>
         <% } %>
       </tbody>
     </table>
