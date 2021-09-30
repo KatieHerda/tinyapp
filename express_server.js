@@ -1,6 +1,7 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const { reset } = require('nodemon');
+const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080;
 
@@ -162,13 +163,17 @@ app.post('/register', (req, res) => {
   const id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   const user = findUserByEmail(email);
 
+  //assigned hashed password to password key
   users[id] = {
     id,
     email,
-    password
+    password : hashedPassword
   };
+
+  console.log(users[id])
 
   //If email / password are empty strings
   if (!email || !password) {
