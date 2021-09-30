@@ -53,6 +53,14 @@ const findUserByEmail = (email) => {
   return null;
 }
 
+// //function that returns URLs for a given user ID
+// const urlsForUser = (id) => {
+//   if (urlDatabase[shortU].userID)
+
+//   //(userID !== )
+// }
+
+
 //recieves form submission and creates a new key:value pair in obj
 //redirected to shortURL section
 app.post('/urls', (req, res) => {
@@ -181,8 +189,17 @@ app.get('/login', (req, res) => {
 //shortURL and longURL are passed to the template in a templateVars obj
 app.get('/urls/:shortURL', (req, res) => {
   const userID = req.cookies['user_id'];
+  const shortU = req.params.shortURL;
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[userID]};
-  res.render('urls_show', templateVars);
+
+  if (!users[userID]) {
+    res.render('urls_unauthorized', templateVars);
+    //does user id match the id that's associated with the short URL
+  } else if (userID !== urlDatabase[shortU].userID) {
+    res.send('This short URL does not belong to you!')
+  } else {
+    res.render('urls_show', templateVars);
+  }
 });
 
 //when the shortURL is clicked on, it redirects to actual website.
@@ -206,7 +223,12 @@ app.get('/u/:shortURL', (req, res) => {
 app.get('/urls', (req, res) => {
   const userID = req.cookies['user_id'];
   const templateVars = { urls: urlDatabase, user: users[userID]};
-  res.render('urls_index', templateVars);
+
+  if (!users[userID]) {
+    res.render('urls_unauthorized', templateVars);
+  } else {
+    res.render('urls_index', templateVars);
+  }
 });
 
 //Root path
