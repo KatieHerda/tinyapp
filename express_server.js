@@ -1,5 +1,6 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const { reset } = require('nodemon');
 const app = express();
 const PORT = 8080;
 
@@ -49,9 +50,16 @@ const findUserByEmail = (email) => {
 //recieves form submission and creates a new key:value pair in obj
 //redirected to shortURL section
 app.post('/urls', (req, res) => {
+  const userID = req.cookies['user_id']
   let generatedShortURL = generateRandomString();
   urlDatabase[generatedShortURL] = req.body.longURL;
-  res.redirect(`/urls/${generatedShortURL}`);
+
+  if (!users[userID]) {
+    res.send('Must be logged in to create a new short URL\n')
+  } else {
+    res.redirect(`/urls/${generatedShortURL}`);
+  }
+  
 });
 
 //add post request to delete a short URL and redirect to the /urls page
@@ -131,7 +139,14 @@ app.get('/urls/new', (req, res) => {
   const userID = req.cookies['users_id'];
   const templateVars = { user: users[userID]};
 
-  res.render('urls_new', templateVars);
+  
+  if (!users[userID]) {
+    res.redirect('/login')
+  } else {
+    res.render('urls_new', templateVars);
+  }
+
+  
 });
 
 app.get('/urls/show', (req, res) => {
