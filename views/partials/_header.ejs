@@ -15,8 +15,8 @@
     </div>
         <div>
           <% if (!user) { %>
-            <a href="/login">Login</a>
-            <a href="/register">Register</a>
+            <button type="submit"; style="background-color: white; border: 1.5px solid blue; border-radius: 5px;color: blue"><a href="/login">Login</a></button>
+            <button type="submit"; style="background-color: white; border: 1.5px solid blue; border-radius: 5px;color: blue"><a href="/register">Register</a></button>
             <% } else { %>
                 <h5>Logged in as: <%= user.email %></h5>
                 <form method="POST" action="/logout">

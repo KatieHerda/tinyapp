@@ -257,9 +257,11 @@ app.get('/u/:shortURL', (req, res) => {
 //urls route that uses res.render to pass URL data to the template
 app.get('/urls', (req, res) => {
   const userID = req.cookies['user_id'];
+  const user = users[userID];
   const templateVars = { urls: urlDatabase, user: users[userID], userID };
 
-  if (!users[userID]) {
+  if (!user) {
+      //return html if user attempting to get
     res.render('urls_unauthorized', templateVars);
   } else {
     res.render('urls_index', templateVars);
@@ -274,7 +276,6 @@ app.get('/', (req, res) => {
   if(!user) {
     return res.redirect('/login');
   } 
-  
   res.redirect('/urls')
 });
 
