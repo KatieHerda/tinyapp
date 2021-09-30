@@ -13,13 +13,13 @@ const urlDatabase = {
 };
 
 const users = {
-  0123: {
-    id: "0123",
+  A1234: {
+    id: "A1234",
     email: "katie@coolkids.com",
     password: "abcd"
   },
-  4567: {
-    id: "4567",
+  A4567: {
+    id: "A4567",
     email: "artur@coolkids.com",
     password: "efgh"
   }
@@ -74,9 +74,25 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 
 //add post request for login that will track cookies.
 app.post('/login', (req, res) => {
-  const userID = req.body.userID;
-  res.cookie('user_id', userID);
+  const email = req.body.email;
+  const password = req.body.password;
+  const userID = findUserByEmail(email);
 
+  //If email / password are empty strings   
+  if (!email || !password) {
+    return res.status(400).send('email or password cannot be blank');
+  }
+
+  //If email / password are empty strings   
+  if (!userID) {
+    return res.status(403).send('email not found');
+  }
+
+  if (userID.password !== password) {
+    return res.status(403).send('password does not match');
+  }
+
+  res.cookie('user_id', userID.id);
   res.redirect('/urls');
 });
 
@@ -90,15 +106,11 @@ app.post('/register', (req, res) => {
   const id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+  const user = findUserByEmail(email);
 
-  users[id] = {
-    id : id, 
-    email : email, 
-    password : password
-  };
+  users[id] = { id, email, password };
 
   //If email / password are empty strings   
-  const user = findUserByEmail(email);
   if (!email || !password) {
     return res.status(400).send('email or password cannot be blank');
   }
@@ -130,8 +142,18 @@ app.get('/urls/show', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
-  res.render('register');
+  const userID = req.cookies['user_id'];
+  const templateVars = { user: users[userID]};
+
+  res.render('register', templateVars);
 });
+
+app.get('/login', (req, res) => {
+  const userID = req.cookies['user_id'];
+  const templateVars = { user: users[userID] };
+
+  res.render('login', templateVars);
+})
 
 // : indicates that shortURL is a route paramater
 //the value in this part of the URL will be available in the req.params obj
