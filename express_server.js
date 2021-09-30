@@ -7,7 +7,7 @@ const PORT = 8080;
 //tells express app to use EJS as its templating engine
 app.set('view engine', 'ejs');
 
-
+// //URL DATABASE AND USER DATABASE
 const urlDatabase = {
   'b2xVn2': {
     longURL: 'http://www.lighthouselabs.ca',
@@ -32,11 +32,13 @@ const users = {
   }
 };
 
+// //MIDDLEWARE
 // when browser submits a post request, the data in body is sent as buffer, not readable
 // a body parser library will convert the request body from buffer into readable string
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+// //FUNCTIONS
 //generate a random shortURL (string)
 const generateRandomString = () => {
   return Math.random().toString(36).substr(2, 6);
@@ -64,6 +66,7 @@ const urlsForUser = (id) => {
   return userURLsArr;
 };
 
+// //APP.POST
 //recieves form submission and creates a new key:value pair in obj
 //redirected to shortURL section
 app.post('/urls', (req, res) => {
@@ -71,6 +74,7 @@ app.post('/urls', (req, res) => {
   let generatedShortURL = generateRandomString();
   urlDatabase[generatedShortURL] = {longURL: req.body.longURL, userID: userID};
 
+  console.log(urlDatabase)
   if (!users[userID]) {
     res.send('Must be logged in to create a new short URL\n');
   } else {
@@ -117,7 +121,7 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 
   for (const urlObject of urlsForUser(userID)) {
     if (urlObject.userID === urlOwner) {
-      const newURL = req.body.edit;
+      const newURL = req.body.longURL;
       urlDatabase[key].longURL = newURL;
       res.redirect('/urls');
       return;
@@ -180,7 +184,7 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
-
+// //APP.GET
 //renders the urls_new template in browser, presents the form to the user.
 //needs to be before the get /urls/:id
 app.get('/urls/new', (req, res) => {
@@ -216,7 +220,6 @@ app.get('/login', (req, res) => {
   res.render('login', templateVars);
 });
 
-// : indicates that shortURL is a route paramater
 //the value in this part of the URL will be available in the req.params obj
 //shortURL and longURL are passed to the template in a templateVars obj
 app.get('/urls/:shortURL', (req, res) => {
@@ -268,17 +271,7 @@ app.get('/', (req, res) => {
   res.send('Hello!');
 });
 
-//JSON string representing entire urlDatabase obj
-app.get('/urls.json', (req, res) => {
-  res.json(urlDatabase);
-});
-
-//Repsponse that contains HTML code, rendered in client browser
-app.get('/hello', (req, res) => {
-  res.send('<html><body>Hello <b>World</b></body></html>\n');
-});
-
-//prints a message to terminal once connection established to port
+// //LISTEN ON PORT
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
