@@ -138,7 +138,7 @@ app.post('/login', (req, res) => {
   }
 
   const doPasswordsMatch = bcrypt.compareSync(password, userID.password);
-  
+
   //If password does not match userID password
   if (!doPasswordsMatch) {
     return res.status(403).send('password does not match');
@@ -167,7 +167,7 @@ app.post('/register', (req, res) => {
     email,
     password : hashedPassword
   };
-
+  
   //If email / password are empty strings
   if (!email || !password) {
     return res.status(400).send('email or password cannot be blank');
