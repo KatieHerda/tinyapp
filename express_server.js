@@ -74,16 +74,12 @@ app.post('/urls', (req, res) => {
   } else {
     res.redirect(`/urls/${generatedShortURL}`);
   }
-
-  console.log(urlDatabase)
-  
 });
 
 //add post request to delete a short URL and redirect to the /urls page
 app.post('/urls/:shortURL/delete', (req, res) => {
   const key = req.params.shortURL;
   const userID = req.session.user_id;
-  console.log(userID);
   const urlOwner = urlDatabase[key].userID; //Returns array of URLs for given user
 
 
