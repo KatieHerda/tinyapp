@@ -124,10 +124,9 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 //add post request for login that will track cookies.
 app.post('/login', (req, res) => {
   const email = req.body.email;
-  //input password
   const password = req.body.password;
   const userID = findUserByEmail(email, users);
-  const doPasswordsMatch = bcrypt.compareSync(password, userID.password);
+ 
 
   //If email / password are empty strings
   if (!email || !password) {
@@ -137,6 +136,9 @@ app.post('/login', (req, res) => {
   if (!userID) {
     return res.status(403).send('email not found');
   }
+
+  const doPasswordsMatch = bcrypt.compareSync(password, userID.password);
+  
   //If password does not match userID password
   if (!doPasswordsMatch) {
     return res.status(403).send('password does not match');
