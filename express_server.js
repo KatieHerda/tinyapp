@@ -51,13 +51,13 @@ const generateRandomString = () => {
 
 //function that returns URLs for a given user ID
 const urlsForUser = (id) => {
-  let userURLsArr = [];
+  let userUrlsArr = [];
   for (const shortU in urlDatabase) {
     if (id === urlDatabase[shortU].userID) {
-      userURLsArr.push(urlDatabase[shortU]);
+      userUrlsArr.push(urlDatabase[shortU]);
     }
   }
-  return userURLsArr;
+  return userUrlsArr;
 };
 
 // //APP.POST
