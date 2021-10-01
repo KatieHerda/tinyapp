@@ -2,6 +2,7 @@ const express = require('express');
 const cookieSession = require('cookie-session')
 const { reset } = require('nodemon');
 const bcrypt = require('bcryptjs');
+const { findUserByEmail } = require('./helpers')
 const app = express();
 const PORT = 8080;
 
@@ -47,17 +48,6 @@ app.use(cookieSession({
 //generate a random shortURL (string)
 const generateRandomString = () => {
   return Math.random().toString(36).substr(2, 6);
-};
-
-//function to find if user exists
-const findUserByEmail = (email, database) => {
-  for (const userID in database) {
-    const idOfUser = database[userID];
-    if (idOfUser.email === email) {
-      return idOfUser;
-    }
-  }
-  return null;
 };
 
 //function that returns URLs for a given user ID
