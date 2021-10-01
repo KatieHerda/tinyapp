@@ -74,6 +74,8 @@ app.post('/urls', (req, res) => {
   } else {
     res.redirect(`/urls/${generatedShortURL}`);
   }
+
+  console.log(urlDatabase)
   
 });
 
@@ -208,6 +210,10 @@ app.get('/register', (req, res) => {
   const userID = req.session.user_id;
   const templateVars = { user: users[userID]};
 
+  if(userID) {
+    return res.redirect('/urls');
+  }
+
   res.render('register', templateVars);
 });
 
@@ -215,6 +221,9 @@ app.get('/login', (req, res) => {
   const userID = req.session.user_id;
   const templateVars = { user: users[userID] };
 
+  if(userID) {
+    return res.redirect('/urls');
+  }
   res.render('login', templateVars);
 });
 
@@ -223,6 +232,12 @@ app.get('/login', (req, res) => {
 app.get('/urls/:shortURL', (req, res) => {
   const userID = req.session.user_id;
   const shortU = req.params.shortURL;
+ 
+
+  if (!urlDatabase[shortU]) {
+    return res.send ('<html><body><h3>Invalid URL</h3><p>Please enter a valid short URL.</p></body></html>')
+  }
+  
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[userID]};
 
   if (!users[userID]) {
