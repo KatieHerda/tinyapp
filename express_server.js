@@ -35,8 +35,7 @@ const users = {
 };
 
 // //MIDDLEWARE
-// when browser submits a post request, the data in body is sent as buffer, not readable
-// a body parser library will convert the request body from buffer into readable string
+// body parser library will convert the request body from buffer into readable string
 app.use(express.urlencoded({ extended: false }));
 
 app.use(cookieSession({
@@ -63,7 +62,6 @@ const urlsForUser = (id) => {
 
 // //APP.POST
 //recieves form submission and creates a new key:value pair in obj
-//redirected to shortURL section
 app.post('/urls', (req, res) => {
   const userID = req.session.user_id;
   let generatedShortURL = generateRandomString();
@@ -105,7 +103,6 @@ app.post('/urls/:shortURL/edit', (req, res) => {
   const urlOwner = urlDatabase[key].userID; //Returns array of URLs for given user
 
   //for a given user, if the URL is not in their given array, do not allow edit
-
   if (!userID) {
     res.send('Please login before continuing\n');
     return;
@@ -121,7 +118,7 @@ app.post('/urls/:shortURL/edit', (req, res) => {
   }
 });
 
-//add post request for login that will track cookies.
+//add post request for login that will track cookies
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -133,6 +130,7 @@ app.post('/login', (req, res) => {
     return res.status(400).send('email or password cannot be blank');
   }
 
+  //If email not found
   if (!userID) {
     return res.status(403).send('email not found');
   }
@@ -154,6 +152,7 @@ app.post('/logout', (req, res) => {
   res.redirect('/urls');
 });
 
+//add post request for register that will track cookies
 app.post('/register', (req, res) => {
   const id = generateRandomString();
   const email = req.body.email;
@@ -161,10 +160,11 @@ app.post('/register', (req, res) => {
   const hashedPassword = bcrypt.hashSync(password, 10);
   const user = findUserByEmail(email, users);
 
-  //assigned hashed password to password key
+  
   users[id] = {
     id,
     email,
+    //assigned hashed password to password key
     password : hashedPassword
   };
   
@@ -184,12 +184,11 @@ app.post('/register', (req, res) => {
 
 // //APP.GET
 //renders the urls_new template in browser, presents the form to the user.
-//needs to be before the get /urls/:id
 app.get('/urls/new', (req, res) => {
   const userID = req.session.user_id;
   const templateVars = { user: users[userID]};
 
-  
+  //If no user, redirect them to login
   if (!users[userID]) {
     res.redirect('/login');
   } else {
@@ -197,6 +196,7 @@ app.get('/urls/new', (req, res) => {
   }
 });
 
+//renders the urls_show template in browser, presents the form to the user.
 app.get('/urls/show', (req, res) => {
   const userID = req.session.user_id;
   const templateVars = { urls: urlDatabase, user: users[userID]};
@@ -204,6 +204,7 @@ app.get('/urls/show', (req, res) => {
   res.render('urls_show', templateVars);
 });
 
+//renders the register template in browser, presents the form to the user.
 app.get('/register', (req, res) => {
   const userID = req.session.user_id;
   const templateVars = { user: users[userID]};
@@ -215,6 +216,7 @@ app.get('/register', (req, res) => {
   res.render('register', templateVars);
 });
 
+//renders the login template in browser, presents the form to the user.
 app.get('/login', (req, res) => {
   const userID = req.session.user_id;
   const templateVars = { user: users[userID] };
@@ -231,7 +233,7 @@ app.get('/urls/:shortURL', (req, res) => {
   const userID = req.session.user_id;
   const shortU = req.params.shortURL;
  
-
+  
   if (!urlDatabase[shortU]) {
     return res.send('<html><body><h3>Invalid URL</h3><p>Please enter a valid short URL.</p></body></html>');
   }
