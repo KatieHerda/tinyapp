@@ -1,8 +1,8 @@
 const express = require('express');
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 const { reset } = require('nodemon');
 const bcrypt = require('bcryptjs');
-const { findUserByEmail } = require('./helpers')
+const { findUserByEmail } = require('./helpers');
 const app = express();
 const PORT = 8080;
 
@@ -42,7 +42,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieSession({
   name: 'session',
   keys: ['secretKeyOne', 'secretkeyTwo'],
-}))
+}));
 
 // //FUNCTIONS
 //generate a random shortURL (string)
@@ -208,7 +208,7 @@ app.get('/register', (req, res) => {
   const userID = req.session.user_id;
   const templateVars = { user: users[userID]};
 
-  if(userID) {
+  if (userID) {
     return res.redirect('/urls');
   }
 
@@ -219,7 +219,7 @@ app.get('/login', (req, res) => {
   const userID = req.session.user_id;
   const templateVars = { user: users[userID] };
 
-  if(userID) {
+  if (userID) {
     return res.redirect('/urls');
   }
   res.render('login', templateVars);
@@ -233,7 +233,7 @@ app.get('/urls/:shortURL', (req, res) => {
  
 
   if (!urlDatabase[shortU]) {
-    return res.send ('<html><body><h3>Invalid URL</h3><p>Please enter a valid short URL.</p></body></html>')
+    return res.send('<html><body><h3>Invalid URL</h3><p>Please enter a valid short URL.</p></body></html>');
   }
   
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[userID]};
@@ -272,7 +272,7 @@ app.get('/urls', (req, res) => {
   const templateVars = { urls: urlDatabase, user: users[userID], userID };
 
   if (!user) {
-      //return html if user attempting to get
+    //return html if user attempting to get
     res.render('urls_unauthorized', templateVars);
   } else {
     res.render('urls_index', templateVars);
@@ -284,10 +284,10 @@ app.get('/', (req, res) => {
   const userID = req.session.user_id;
   const user = users[userID];
 
-  if(!user) {
+  if (!user) {
     return res.redirect('/login');
-  } 
-  res.redirect('/urls')
+  }
+  res.redirect('/urls');
 });
 
 // //LISTEN ON PORT
