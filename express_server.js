@@ -49,17 +49,6 @@ const generateRandomString = () => {
   return Math.random().toString(36).substr(2, 6);
 };
 
-//function that returns URLs for a given user ID
-const urlsForUser = (id) => {
-  let userUrlsArr = [];
-  for (const shortU in urlDatabase) {
-    if (id === urlDatabase[shortU].userID) {
-      userUrlsArr.push(urlDatabase[shortU]);
-    }
-  }
-  return userUrlsArr;
-};
-
 // //APP.POST
 //recieves form submission and creates a new key:value pair in obj
 app.post('/urls', (req, res) => {
@@ -76,31 +65,41 @@ app.post('/urls', (req, res) => {
 
 //add post request to delete a short URL and redirect to the /urls page
 app.post('/urls/:shortURL/delete', (req, res) => {
-  const key = req.params.shortURL;
+  const shortURL = req.params.shortURL;
   const userID = req.session.user_id;
-  const urlOwner = urlDatabase[key].userID; //Returns array of URLs for given user
-
 
   //for a given user, if the URL is not in their given array, do not allow delete
   if (!userID) {
     res.send('Please login before continuing\n');
   }
 
-  for (const urlObject of urlsForUser(userID)) {
-    //if given ID and ID in object match, allow deletion
-    if (urlObject.userID === urlOwner) {
-      delete urlDatabase[key];
-      res.redirect('/urls');
-      return;
-    }
+  const user = users[userID];
+  if (!user) {
+    //If the short URL exists but user who owns it is not logged in.
+    return res.send('Invalid user, please log in.')
+    //does user id match the id that's associated with the short URL
+  } 
+  
+  //If the URL does not exist
+  const url = urlDatabase[shortURL];
+  if (!url) {
+    return res.send('Invalid short URL.')
   }
+  
+  //Does the URL belong to the user?
+  if (url.userID !== userID) {
+    return res.send('This URL does not belong to you.')
+  }
+
+  delete urlDatabase[shortURL];
+  res.redirect('/urls')
 });
 
 //add post request to edit a short URL and redirect to the /urls page
 app.post('/urls/:shortURL/edit', (req, res) => {
-  const key = req.params.shortURL;
+  const shortURL = req.params.shortURL;
   const userID = req.session.user_id;
-  const urlOwner = urlDatabase[key].userID; //Returns array of URLs for given user
+  //const urlOwner = urlDatabase[key].userID; //Returns array of URLs for given user
 
   //for a given user, if the URL is not in their given array, do not allow edit
   if (!userID) {
@@ -108,14 +107,27 @@ app.post('/urls/:shortURL/edit', (req, res) => {
     return;
   }
 
-  for (const urlObject of urlsForUser(userID)) {
-    if (urlObject.userID === urlOwner) {
-      const newURL = req.body.longURL;
-      urlDatabase[key].longURL = newURL;
-      res.redirect('/urls');
-      return;
-    }
+  const user = users[userID];
+  if (!user) {
+    //If the short URL exists but user who owns it is not logged in.
+    return res.send('Invalid user, please log in.')
+    //does user id match the id that's associated with the short URL
+  } 
+  
+  //If the URL does not exist
+  const url = urlDatabase[shortURL];
+  if (!url) {
+    return res.send('Invalid short URL.')
   }
+  
+  //Does the URL belong to the user?
+  if (url.userID !== userID) {
+    return res.send('This URL does not belong to you.')
+  }
+
+  const newURL = req.body.longURL;
+  urlDatabase[shortURL].longURL = newURL;
+  res.redirect('/urls');
 });
 
 //add post request for login that will track cookies
@@ -231,23 +243,33 @@ app.get('/login', (req, res) => {
 //shortURL and longURL are passed to the template in a templateVars obj
 app.get('/urls/:shortURL', (req, res) => {
   const userID = req.session.user_id;
-  const shortU = req.params.shortURL;
+  const shortURL = req.params.shortURL;
  
   
-  if (!urlDatabase[shortU]) {
-    return res.send('<html><body><h3>Invalid URL</h3><p>Please enter a valid short URL.</p></body></html>');
+  if (!urlDatabase[shortURL]) {
+    return res.send('Invalid URL. Please enter a valid short URL.');
+  }
+  
+  const user = users[userID];
+  if (!user) {
+    //res.render('urls_unauthorized', templateVars);
+    return res.send('Invalid user, please log in.')
+    //does user id match the id that's associated with the short URL
+  } 
+  
+  const url = urlDatabase[shortURL];
+  if (!url) {
+    return res.send('Invalid short URL.')
+  }
+
+  //Does the URL belong to the user?
+  if (url.userID !== userID) {
+    return res.send('This URL does not belong to you.')
   }
   
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[userID]};
+  res.render('urls_show', templateVars);
 
-  if (!users[userID]) {
-    res.render('urls_unauthorized', templateVars);
-    //does user id match the id that's associated with the short URL
-  } else if (userID !== urlDatabase[shortU].userID) {
-    res.send('This short URL does not belong to you!');
-  } else {
-    res.render('urls_show', templateVars);
-  }
 });
 
 //when the shortURL is clicked on, it redirects to actual website.
@@ -255,16 +277,20 @@ app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
 
   if (!urlDatabase[shortURL]) {
-    res.send('Short URL does not exist!');
+    return res.send('Short URL does not exist!');
   }
 
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  //determine if long URL contains http:// we're not doubling up.
-  if (longURL.includes('http://')) {
-    res.redirect(`${longURL}`);
-  } else {
-    res.redirect(`http://${longURL}`);
+  let longURL = urlDatabase[req.params.shortURL].longURL;
+
+  if (longURL === undefined) {
+    return res.send('This URL does not exist!');
   }
+  
+  //determine if long URL contains http:// we're not doubling up.
+  if (!longURL.includes('http://')) {
+    longURL = 'http://' + longURL;
+  }
+  res.redirect(longURL);
 });
 
 //urls route that uses res.render to pass URL data to the template
