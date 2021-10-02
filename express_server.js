@@ -96,8 +96,8 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 });
 
 //add post request to edit a short URL and redirect to the /urls page
-app.post('/urls/:shortURL/edit', (req, res) => {
-  const shortURL = req.params.shortURL;
+app.post('/urls/:id', (req, res) => {
+  const shortURL = req.params.id;
   const userID = req.session.user_id;
   //const urlOwner = urlDatabase[key].userID; //Returns array of URLs for given user
 
