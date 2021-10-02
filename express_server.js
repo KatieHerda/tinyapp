@@ -171,7 +171,6 @@ app.post('/register', (req, res) => {
   const hashedPassword = bcrypt.hashSync(password, 10);
   const user = findUserByEmail(email, users);
 
-  
   users[id] = {
     id,
     email,
@@ -244,7 +243,6 @@ app.get('/urls/:shortURL', (req, res) => {
   const userID = req.session.user_id;
   const shortURL = req.params.shortURL;
  
-  
   if (!urlDatabase[shortURL]) {
     return res.send('Invalid URL. Please enter a valid short URL.');
   }
@@ -268,7 +266,6 @@ app.get('/urls/:shortURL', (req, res) => {
   
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[userID]};
   res.render('urls_show', templateVars);
-
 });
 
 //when the shortURL is clicked on, it redirects to actual website.
@@ -304,7 +301,6 @@ app.get('/urls', (req, res) => {
   }
   
   res.render('urls_index', templateVars);
-
 });
 
 //Root path
